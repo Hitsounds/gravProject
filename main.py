@@ -7,7 +7,7 @@ from ui_widgets.varviewer import VariableViewer
 
 class MainApplication(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        tk.Frame.__init__(self, parent, *args, **kwargs)
+        super().__init__(parent, *args, **kwargs)
         self.parent = parent
         self.parent.title("Gravity Simulator")
         self.parent.geometry("1024x768")
@@ -24,26 +24,29 @@ class MainApplication(tk.Frame):
         self.SimConfig = SimConfig(self)
         self.VariableViewer = VariableViewer(self)
 
+        #Padding between the widgets in pixels
+        padding = 5 
+        
         #Use grid GUI layout to organise the frames according to design
         self.viewer.grid(row=0,
                         column=0,
-                        pady=20,
-                        padx=20,
+                        pady=padding,
+                        padx=padding,
                         sticky="NWSE")
         self.timeline.grid(row=1,
                         column=0,
-                        pady=20,
-                        padx=20,
+                        pady=padding,
+                        padx=padding,
                         sticky="NWSE")
         self.SimConfig.grid(row=0,
                         column=1,
-                        pady=20,
-                        padx=20,
+                        pady=padding,
+                        padx=padding,
                         sticky="NWSE")
         self.VariableViewer.grid(row=1,
                         column=1,
-                        pady=20,
-                        padx=20,
+                        pady=padding,
+                        padx=padding,
                         sticky="NWSE")
 
 if __name__ == "__main__":
