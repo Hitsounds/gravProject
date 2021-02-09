@@ -1,5 +1,6 @@
 import tkinter as tk
 from functools import partial
+import numpy as np
 
 class SimConfig(tk.Frame):
 
@@ -18,9 +19,6 @@ class SimConfig(tk.Frame):
         }
         self.settings["general"]["simulation_mode"][2].set("cycles")
         self.settings["general"]["timestep"][2].set("10")
-
-        
-
 
         #Title of widget
         title = tk.Label(self, text="Simulation Settings")
@@ -202,7 +200,19 @@ class SimConfig(tk.Frame):
             self.remove_body(self.active_body)
 
         button = tk.Button(self.options, text="Remove Body", command=remove)
-        button.grid(row=5, column=0)
+        button.grid(row=6, column=0)
 
     def get_settings(self):
-        return self.settings
+        settings_clean =    {"general":{
+                                "simulation_mode":self.settings["general"]["simulation_mode"][2].get(),
+                                "timestep":float(self.settings["general"]["timestep"][2].get())
+                                },
+                            "bodies":[]
+                            }
+        for i in self.settings["bodies"]:
+            temp = {"mass":None,"pos":None,"vel":None}
+            temp["mass"] = float(i["mass"][2].get())
+            temp["pos"] = np.array(float(i["inital_x_pos"][2].get()), float(i["inital_y_pos"][2].get()))
+            temp["vel"] = np.array(float(i["inital_x_speed"][2].get()), float(i["inital_y_speed"][2].get()))
+            settings_clean["bodies"].append(temp)
+        return settings_clean

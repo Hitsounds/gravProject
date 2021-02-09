@@ -33,7 +33,6 @@ class SimulationViewer(tk.Frame):
 
         self.update_line(100,200)
 
-
     def clear_line(self):
         self.line.set_xdata([])
         self.line.set_ydata([])
