@@ -1,0 +1,1 @@
+{"general": {"simulation_mode": "cycles", "timestep": 10.0}, "bodies": [{"nick": "Sun", "mass": 1.989e+30, "pos": [0.0, 0.0], "vel": [0.0, 0.0]}, {"nick": "Earth", "mass": 5.972e+24, "pos": [149600000000.0, 0.0], "vel": [0.0, 29800.0]}, {"nick": "Jupiter", "mass": 1.898e+27, "pos": [778500000000.0, 0.0], "vel": [0.0, 13100.0]}]}

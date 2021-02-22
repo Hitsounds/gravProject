@@ -1,6 +1,7 @@
 import tkinter as tk
 from functools import partial
 import numpy as np
+import json
 
 class SimConfig(tk.Frame):
 
@@ -9,11 +10,11 @@ class SimConfig(tk.Frame):
         self.parent = parent
         self.config(bg="purple")
 
-
+        #Settings Dictionary
         self.settings = {
         "general":{
             "simulation_mode":["Simulation Mode","textChoice",tk.StringVar()],
-            "timestep":["Timestep Ratio","numInput",tk.DoubleVar()]
+            "timestep":["Real Time To Sim Time Ratio","numInput",tk.DoubleVar()]
         },
         "bodies":[]
         }
@@ -29,10 +30,12 @@ class SimConfig(tk.Frame):
         self.body_edit_container = tk.Frame(self, background="#ffd3d3")
         self.choice.set("General")
 
+        #Dropdown menu for body selecction
         self.configMenu = tk.OptionMenu(self.body_edit_container, self.choice, {"placeholder"}, command=self.render_generalsettings)
         self.construct_optionmenu()
         self.configMenu.pack(side="left")
 
+        #Add body button
         self.add_button = tk.Button(self.body_edit_container, text="Add body" , command=self.add_body)
         self.add_button.pack(side="left")
         
@@ -40,7 +43,6 @@ class SimConfig(tk.Frame):
 
         self.options = tk.Frame(self, bg="pink")
         self.options.pack(side="bottom", fill="both",expand=1)
-
 
         #Canvas is used here to make the widget scrollable as we may have more options than space
         #and also to make a clear distinction between the persistent menu and the settings which change depending on the item in the dropdown
@@ -52,6 +54,7 @@ class SimConfig(tk.Frame):
         #yscrollbar.pack(side="right", fill="y")
 
         self.add_body()
+        #Active body variable for use when remove button is pressed
         self.active_body = 0
         #Show general settings on first launch
         self.render_generalsettings()
@@ -100,7 +103,6 @@ class SimConfig(tk.Frame):
                 "inital_x_speed":["x Speed (m/s)","numInput",tk.DoubleVar()],
                 "inital_y_speed":["y Speed (m/s)","numInput",tk.DoubleVar()]
         }  
-        #defaults
         body_template["mass"][2].set(10)
         body_template["inital_x_pos"][2].set(10)
         body_template["inital_y_pos"][2].set(10)
@@ -128,6 +130,9 @@ class SimConfig(tk.Frame):
             widget.destroy()
 
     def render_generalsettings(self):
+        '''
+        Renders settings relevant to general running of the simulation
+        '''
         self.construct_optionmenu()
         self.choice.set("General")
         self.clear_optionsFrame()
@@ -146,7 +151,19 @@ class SimConfig(tk.Frame):
         timeStepInput.configure(validatecommand=(timeStepInput.register(self.positiveFloatValidation), "%P"))
         timeStepInput.grid(row=1, column=1)
 
+        #Buttton To import a profile
+        button = tk.Button(self.options, text="Import Profile", command=self.import_profile)
+        button.grid(row=2, column=0)
+
+        #Buttton To export a profile
+        button = tk.Button(self.options, text="Export Profile", command=self.export_profile)
+        button.grid(row=3, column=0)
+
     def render_bodysettings(self, i):
+        '''
+        Renders Settings for each body
+        i: index of body
+        '''
         self.construct_optionmenu()
         name = self.settings["bodies"][int(i)]["nick"][2].get() or f"Body {i}"
         self.choice.set(name)
@@ -202,17 +219,57 @@ class SimConfig(tk.Frame):
         button = tk.Button(self.options, text="Remove Body", command=remove)
         button.grid(row=6, column=0)
 
-    def get_settings(self):
-        settings_clean =    {"general":{
+    def get_settings(self, export=False):
+        '''
+        Generates a clean settings dictionary object which can be used
+        by other parts of the program
+        '''
+        settings_clean ={"general":{
                                 "simulation_mode":self.settings["general"]["simulation_mode"][2].get(),
                                 "timestep":float(self.settings["general"]["timestep"][2].get())
                                 },
                             "bodies":[]
-                            }
+                        }
         for i in self.settings["bodies"]:
-            temp = {"mass":None,"pos":None,"vel":None}
+            temp = {"nick":"","mass":None,"pos":None,"vel":None}
+            temp["nick"] = i["nick"][2].get()
             temp["mass"] = float(i["mass"][2].get())
-            temp["pos"] = np.array(float(i["inital_x_pos"][2].get()), float(i["inital_y_pos"][2].get()))
-            temp["vel"] = np.array(float(i["inital_x_speed"][2].get()), float(i["inital_y_speed"][2].get()))
+            temp["pos"] = [float(i["inital_x_pos"][2].get()), float(i["inital_y_pos"][2].get())]
+            temp["vel"] = [float(i["inital_x_speed"][2].get()), float(i["inital_y_speed"][2].get())]
+            if not export:
+                #want np objects when not exporting
+                temp["pos"] = np.array(temp["pos"])
+                temp["vel"] = np.array(temp["vel"])
             settings_clean["bodies"].append(temp)
         return settings_clean
+
+    def import_profile(self):
+        '''
+        Import a profile from an .msim file
+        '''
+        profile = tk.filedialog.askopenfilename(initialdir = "/",title = "Select file", filetypes=(("simulation profiles","*.msim"),("all files","*.*")))
+        print(profile)
+        with open(profile, "r") as profile_file:
+            new_settings = json.load(profile_file)
+        self.settings["general"]["simulation_mode"][2].set(new_settings["general"]["simulation_mode"])
+        self.settings["general"]["timestep"][2].set(new_settings["general"]["timestep"])
+        self.settings["bodies"] = []
+        for i in range(len(new_settings["bodies"])):
+            self.add_body()
+            self.settings["bodies"][i]["nick"][2].set(new_settings["bodies"][i]["nick"])
+            self.settings["bodies"][i]["mass"][2].set(new_settings["bodies"][i]["mass"])
+            self.settings["bodies"][i]["inital_x_pos"][2].set(new_settings["bodies"][i]["pos"][0])
+            self.settings["bodies"][i]["inital_y_pos"][2].set(new_settings["bodies"][i]["pos"][1])
+            self.settings["bodies"][i]["inital_x_speed"][2].set(new_settings["bodies"][i]["vel"][0])
+            self.settings["bodies"][i]["inital_y_speed"][2].set(new_settings["bodies"][i]["vel"][1])
+        self.render_generalsettings()
+
+    def export_profile(self):
+        '''
+        Export current settings to an .msim profile file
+        '''
+        exportData = self.get_settings(export=True)
+        handle = tk.filedialog.asksaveasfile(mode="w", defaultextension=".msim")
+        json.dump(exportData,handle)
+        handle.close()
+        

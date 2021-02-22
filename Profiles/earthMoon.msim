@@ -1,0 +1,1 @@
+{"general": {"simulation_mode": "cycles", "timestep": 10000.0}, "bodies": [{"nick": "Earth", "mass": 5.972e+24, "pos": [149600000000.0, 0.0], "vel": [0.0, 29800.0]}, {"nick": "Moon", "mass": 7.34767309e+22, "pos": [149984400000.0, 0.0], "vel": [0.0, 30822.0]}]}

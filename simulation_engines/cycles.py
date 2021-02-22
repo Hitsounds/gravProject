@@ -63,3 +63,8 @@ class cycles(base_simulator):
             self.current_bodies_state[i]["vel"] = (self.current_bodies_state[i]["vel"] +  accelerations[i]*sim_time_delta) - vel_offset
         return self.current_bodies_state
         
+    def getCurrentState(self):
+        '''
+        Returns current state of simulation
+        '''
+        return self.current_bodies_state

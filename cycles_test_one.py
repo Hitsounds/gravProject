@@ -62,4 +62,10 @@ system = system = [
 
 sim = cycles(system)
 while True:
-    print(sim.update(3600))
+    sim.update(60)
+    sim.update(60)
+    sim.update(60)
+    sim.update(60)
+    sim.update(60)
+    sim.update(60)
+    print(sim.update(60))
